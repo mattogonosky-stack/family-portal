@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ogonosky Family Shelf</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📂</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bitter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF0F3; --sheet:#FFFFFF; --ink:#1B2A3A; --muted:#5B6B7C; --line:#D3DAE1;
+  --manila:#E7CD8B; --manila-edge:#C9A95B; --manila-ink:#3E3113;
+  --accent:#2D6A57; --accent-ink:#FFFFFF; --danger:#A23B2A; --focus:#1F6FEB;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --head:"Bitter", Georgia, "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#141B22; --sheet:#1C252F; --ink:#E6EBF0; --muted:#9AA8B6; --line:#2E3A46;
+    --manila:#5A4A22; --manila-edge:#8A7236; --manila-ink:#F4E6BD;
+    --accent:#5FB39A; --accent-ink:#0E1A15; --danger:#E0806E; --focus:#6EA8FF;
+  }
+}
+*{box-sizing:border-box}
+html{font-size:18px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--head);font-weight:700;line-height:1.2;margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.hidden{display:none!important}
+
+/* buttons */
+.btn{min-height:44px;padding:.45rem 1rem;border-radius:8px;border:1.5px solid var(--line);background:var(--sheet);cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.danger{color:var(--danger);border-color:transparent;background:transparent}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--muted)}
+.btn:disabled{opacity:.55;cursor:wait}
+
+/* auth */
+.auth{max-width:26rem;margin:10vh auto;padding:0 1rem}
+.auth .card{background:var(--sheet);border-radius:12px;padding:2rem;border:1px solid var(--line)}
+.auth h1{font-size:1.8rem;margin-bottom:.25rem}
+.auth p.sub{color:var(--muted);margin:0 0 1.5rem}
+label{display:block;font-weight:700;margin:1rem 0 .3rem}
+input[type=text],input[type=email],input[type=password],input[type=url],textarea,select{width:100%;padding:.6rem .75rem;border:1.5px solid var(--line);border-radius:8px;background:var(--paper)}
+textarea{min-height:8rem;resize:vertical}
+.msg{margin-top:1rem;padding:.6rem .8rem;border-radius:8px;background:var(--paper)}
+.msg.err{color:var(--danger)}
+
+/* shell */
+header.top{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;max-width:72rem;margin:0 auto}
+header.top h1{font-size:1.4rem;flex:1}
+header.top .who{color:var(--muted)}
+.shell{display:grid;grid-template-columns:15rem 1fr;max-width:72rem;margin:0 auto;padding:0 1.5rem 3rem;align-items:start}
+
+/* folder tabs: the one distinctive element */
+nav.tabs{display:flex;flex-direction:column;gap:.35rem;padding-top:1.25rem}
+.tab{all:unset;cursor:pointer;display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;border-radius:10px 0 0 10px;background:transparent;color:var(--ink);position:relative;min-height:44px}
+.tab:hover{background:color-mix(in srgb, var(--manila) 35%, transparent)}
+.tab[aria-current="true"]{background:var(--manila);color:var(--manila-ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--manila-edge);margin-right:-1px}
+.tab:focus-visible{outline:3px solid var(--focus)}
+.tab .ic{font-size:1.25rem;width:1.6rem;text-align:center}
+.tab .ct{margin-left:auto;font-size:.8rem;color:inherit;opacity:.7}
+nav.tabs .add{margin-top:.75rem;align-self:flex-start}
+
+main.sheet{background:var(--sheet);border-radius:0 12px 12px 12px;border:1px solid var(--line);border-top:6px solid var(--manila);min-height:60vh;padding:2rem 2.25rem}
+.chead{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start;margin-bottom:1.5rem}
+.chead .t{flex:1;min-width:14rem}
+.chead h2{font-size:2rem}
+.chead p{color:var(--muted);margin:.4rem 0 0;max-width:60ch}
+.tools{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--line)}
+
+ul.items{list-style:none;margin:0;padding:0}
+ul.items li{display:grid;grid-template-columns:2.25rem 1fr auto;gap:.75rem;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--line)}
+ul.items li:last-child{border-bottom:0}
+.it-ic{font-size:1.4rem;text-align:center}
+.it-t{font-weight:700;word-break:break-word}
+.it-m{color:var(--muted);font-size:.85rem}
+.it-a{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:flex-end}
+.empty{color:var(--muted);padding:2rem 0;max-width:40ch}
+
+/* viewer */
+.viewer{position:fixed;inset:0;background:var(--paper);z-index:50;display:flex;flex-direction:column}
+.viewer .bar{display:flex;gap:.5rem;align-items:center;padding:.6rem 1rem;border-bottom:1px solid var(--line);background:var(--sheet)}
+.viewer .bar h3{flex:1;font-size:1.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer .body{flex:1;overflow:auto;display:flex}
+.viewer iframe{flex:1;border:0;background:#fff;width:100%}
+.viewer img{max-width:100%;margin:auto;display:block}
+.viewer pre{margin:0;padding:1.5rem;white-space:pre-wrap;word-break:break-word;font-size:.9rem;flex:1}
+.viewer .note{flex:1;display:flex;flex-direction:column;padding:1rem;gap:.5rem;max-width:60rem;margin:0 auto;width:100%}
+.viewer .note textarea{flex:1;min-height:50vh;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem}
+
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--sheet);color:var(--ink);width:min(34rem,94vw);padding:1.5rem}
+dialog::backdrop{background:rgba(10,20,30,.45)}
+dialog h3{font-size:1.3rem}
+dialog .row{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.5rem}
+.share-row{display:grid;grid-template-columns:1fr auto auto;gap:.75rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--line)}
+.share-row label{margin:0;font-weight:400;display:flex;gap:.4rem;align-items:center}
+
+/* pool */
+.pool{margin-bottom:2rem}
+.pool h3{font-size:1.25rem;margin:1.5rem 0 .6rem}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(12rem,1fr));gap:.6rem}
+.board .b{border:1.5px solid var(--line);border-radius:10px;padding:.7rem .9rem;background:var(--paper)}
+.board .b.mine{border-color:var(--manila-edge)}
+.board .b .n{font-weight:700}
+.board .b .o{color:var(--muted);font-size:.8rem}
+.board .b .tot{font-family:var(--head);font-size:1.8rem;line-height:1.1;margin-top:.2rem}
+.board .b .sub{color:var(--muted);font-size:.8rem}
+.seg{display:flex;flex-wrap:wrap;gap:.35rem;margin:.5rem 0 1rem}
+.seg button{min-height:40px;padding:.3rem .9rem;border-radius:99px;border:1.5px solid var(--line);background:var(--sheet);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--manila);border-color:var(--manila-edge);color:var(--manila-ink);font-weight:700}
+.pform{display:grid;grid-template-columns:6rem 1fr 7rem auto;gap:.6rem;align-items:end;background:var(--paper);padding:1rem;border-radius:10px}
+.pform label{margin:0 0 .25rem;font-size:.85rem}
+.pform .btn{white-space:nowrap}
+table.picks{width:100%;border-collapse:collapse;margin-top:1rem;font-variant-numeric:tabular-nums}
+table.picks th,table.picks td{text-align:left;padding:.5rem .4rem;border-bottom:1px solid var(--line)}
+table.picks th{font-size:.8rem;color:var(--muted);font-weight:700}
+table.picks td.num{text-align:right}
+.pending{color:var(--muted);font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
+.chips span{border:1px solid var(--line);border-radius:6px;padding:.1rem .45rem;font-size:.8rem}
+details.more{margin-top:1rem}
+details.more summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.scroll{overflow-x:auto}
+@media (max-width:760px){.pform{grid-template-columns:1fr 1fr}.pform .team{grid-column:1 / -1}.pform .btn{grid-column:1 / -1;justify-content:center}}
+.toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--sheet);padding:.6rem 1.1rem;border-radius:8px;z-index:60}
+
+@media (max-width:760px){
+  header.top{padding:1rem}
+  .shell{grid-template-columns:1fr;padding:0 .75rem 2rem}
+  nav.tabs{flex-direction:row;overflow-x:auto;padding-top:0;gap:.25rem}
+  .tab{border-radius:10px 10px 0 0;white-space:nowrap;margin-right:0}
+  .tab[aria-current="true"]{margin-bottom:-1px}
+  nav.tabs .add{margin:0 0 0 .25rem}
+  main.sheet{border-radius:0 0 12px 12px;padding:1.25rem}
+  ul.items li{grid-template-columns:2rem 1fr}
+  .it-a{grid-column:1 / -1;justify-content:flex-start}
+  .chead h2{font-size:1.6rem}
+}
+@media (prefers-reduced-motion:no-preference){ .tab{transition:background .15s} }
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite"></div>
+<dialog id="dlg"></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ============ CONFIG ============ */
+const CONFIG = {
+  title: "Ogonosky Family Shelf",
+  url: "https://tejgntbponstecmodian.supabase.co",
+  key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlamdudGJwb25zdGVjbW9kaWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NjA2MTYsImV4cCI6MjEwNTMzNjYxNn0.3WnFYe4Dv5CA4MAjRJDoMrok6U6ebb-veZ9VE3WFG4c",
+  bucket: "portal-files",
+  // One-time import from the old Document Share notepad. Set files to [] once imported.
+  oldNotepad: {
+    base: "https://yiawbwwbhwdsqymjtrfu.supabase.co/storage/v1/object/public/notepad-files/",
+    files: [
+      "1789133449493_PromptLibrary.xlsx",
+      "1789135081561_SetupGuide.html",
+      "1789141869314_PowerAppsBuildSpec.html",
+      "1789156032843_Claude_Code_Field_Guide.html"
+    ]
+  }
+};
+
+/* ============ CLIENT ============ */
+// No-op lock avoids the navigator.locks hang some GitHub Pages setups hit.
+const sb = supabase.createClient(CONFIG.url, CONFIG.key, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true,
+          lock: async (_n, _t, fn) => await fn() }
+});
+const needsPassword = /type=(invite|recovery)/.test(location.hash);
+
+/* ============ STATE ============ */
+const S = { user:null, profile:null, collections:[], myAccess:{}, current:null, items:[], people:[], pwMode:needsPassword };
+const $app = document.getElementById("app");
+const $dlg = document.getElementById("dlg");
+
+/* ============ HELPERS ============ */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtSize = b => b == null ? "" : b < 1024 ? b + " B" : b < 1048576 ? (b/1024).toFixed(0) + " KB" : (b/1048576).toFixed(1) + " MB";
+const fmtDate = d => d ? new Date(d).toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"}) : "";
+const isAdmin = () => !!S.profile?.is_admin;
+const canEdit = cid => isAdmin() || !!S.myAccess[cid]?.can_edit;
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
+function fail(e, where){ console.error(where, e); toast((where ? where + ": " : "") + (e?.message || e)); }
+function iconFor(it){
+  if (it.kind === "note") return "📝";
+  if (it.kind === "link") return "🔗";
+  const m = it.mime_type || "", n = (it.title || "").toLowerCase();
+  if (m.includes("html") || n.endsWith(".html")) return "🌐";
+  if (m.includes("pdf")) return "📄";
+  if (m.startsWith("image/")) return "🖼️";
+  if (m.includes("sheet") || /\.(xlsx|xls|csv)$/.test(n)) return "📊";
+  if (m.includes("word") || n.endsWith(".docx")) return "📃";
+  return "📦";
+}
+function viewableType(it){
+  const m = it.mime_type || "", n = (it.title || "").toLowerCase();
+  if (m.includes("html") || /\.html?$/.test(n)) return "html";
+  if (m.includes("pdf") || n.endsWith(".pdf")) return "pdf";
+  if (m.startsWith("image/")) return "image";
+  if (m.startsWith("text/") || /\.(txt|md|csv|json|log)$/.test(n)) return "text";
+  return null;
+}
+const safeName = n => n.replace(/[^\w.\-]+/g, "_").slice(-120);
+
+/* ============ AUTH SCREENS ============ */
+function renderLogin(msg="", isErr=false){
+  $app.innerHTML = `
+  <div class="auth"><div class="card">
+    <h1>${esc(CONFIG.title)}</h1>
+    <p class="sub">Sign in to see what's been shared with you.</p>
+    <form id="f">
+      <label for="em">Email</label><input id="em" type="email" autocomplete="username" required>
+      <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required>
+      <div style="display:flex;gap:.5rem;margin-top:1.5rem;flex-wrap:wrap">
+        <button class="btn primary" type="submit">Sign in</button>
+        <button class="btn quiet" type="button" id="forgot">Forgot password?</button>
+      </div>
+    </form>
+    ${msg ? `<div class="msg ${isErr?"err":""}">${esc(msg)}</div>` : ""}
+  </div></div>`;
+  document.getElementById("f").onsubmit = async e => {
+    e.preventDefault();
+    const b = e.submitter; b.disabled = true;
+    const { error } = await sb.auth.signInWithPassword({ email: em.value.trim(), password: pw.value });
+    b.disabled = false;
+    if (error) renderLogin(error.message === "Invalid login credentials" ? "That email and password don't match. Check both and try again." : error.message, true);
+  };
+  document.getElementById("forgot").onclick = async () => {
+    const email = em.value.trim();
+    if (!email) return renderLogin("Type your email above first, then choose Forgot password.", true);
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    renderLogin(error ? error.message : "If that email has an account, a reset link is on its way. If it doesn't arrive, ask Matt to reset it for you.", !!error);
+  };
+}
+
+function renderSetPassword(msg="", isErr=false){
+  $app.innerHTML = `
+  <div class="auth"><div class="card">
+    <h1>Choose a password</h1>
+    <p class="sub">You'll use this with your email to sign in from now on.</p>
+    <form id="f">
+      <label for="p1">New password</label><input id="p1" type="password" autocomplete="new-password" minlength="8" required>
+      <label for="p2">Type it again</label><input id="p2" type="password" autocomplete="new-password" minlength="8" required>
+      <div style="display:flex;gap:.5rem;margin-top:1.5rem">
+        <button class="btn primary" type="submit">Save password</button>
+        ${S.pwMode ? "" : `<button class="btn quiet" type="button" id="cancel">Cancel</button>`}
+      </div>
+    </form>
+    ${msg ? `<div class="msg ${isErr?"err":""}">${esc(msg)}</div>` : ""}
+  </div></div>`;
+  document.getElementById("f").onsubmit = async e => {
+    e.preventDefault();
+    if (p1.value !== p2.value) return renderSetPassword("Those two passwords don't match.", true);
+    const b = e.submitter; b.disabled = true;
+    const { error } = await sb.auth.updateUser({ password: p1.value });
+    b.disabled = false;
+    if (error) return renderSetPassword(error.message, true);
+    S.pwMode = false; history.replaceState(null, "", location.pathname);
+    toast("Password saved"); boot();
+  };
+  const c = document.getElementById("cancel"); if (c) c.onclick = () => renderShell();
+}
+
+/* ============ DATA ============ */
+async function loadBase(){
+  const uid = S.user.id;
+  const [p, c, a] = await Promise.all([
+    sb.from("profiles").select("*").eq("id", uid).maybeSingle(),
+    sb.from("collections").select("*").order("sort").order("title"),
+    sb.from("collection_access").select("collection_id, can_edit").eq("user_id", uid)
+  ]);
+  if (c.error) throw c.error;
+  S.profile = p.data || { id: uid, email: S.user.email, display_name: S.user.email, is_admin: false };
+  S.collections = c.data || [];
+  S.myAccess = Object.fromEntries((a.data || []).map(r => [r.collection_id, r]));
+  if (isAdmin()){
+    const pp = await sb.from("profiles").select("id, email, display_name, is_admin").order("display_name");
+    S.people = pp.data || [];
+  }
+  if (!S.current || !S.collections.find(x => x.id === S.current)) S.current = S.collections[0]?.id || null;
+}
+async function loadItems(){
+  if (!S.current){ S.items = []; return; }
+  const { data, error } = await sb.from("items").select("*").eq("collection_id", S.current).order("sort").order("created_at", { ascending:false });
+  if (error) throw error;
+  S.items = data || [];
+  const col = S.collections.find(c => c.id === S.current);
+  if (col?.module === "nfl_pool") await loadPool(col);
+}
+
+/* ============ MAIN SHELL ============ */
+function renderShell(){
+  const col = S.collections.find(c => c.id === S.current);
+  const ed = col && canEdit(col.id);
+  $app.innerHTML = `
+  <header class="top">
+    <h1>${esc(CONFIG.title)}</h1>
+    <span class="who">${esc(S.profile.display_name || S.profile.email)}</span>
+    <button class="btn quiet" id="myname">Your name</button>
+    <button class="btn quiet" id="chpw">Change password</button>
+    <button class="btn" id="out">Sign out</button>
+  </header>
+  <div class="shell">
+    <nav class="tabs" aria-label="Collections">
+      ${S.collections.map(c => `
+        <button class="tab" data-id="${c.id}" aria-current="${c.id === S.current}">
+          <span class="ic" aria-hidden="true">${esc(c.icon || "📁")}</span><span>${esc(c.title)}</span>
+        </button>`).join("")}
+      ${isAdmin() ? `<button class="btn quiet add" id="newcol">+ New collection</button>` : ""}
+    </nav>
+    <main class="sheet">
+      ${!col ? `<p class="empty">${isAdmin() ? "Create a collection to start sharing." : "When something is shared with you, it will show up here."}</p>` : `
+      <div class="chead">
+        <div class="t"><h2>${esc(col.title)}</h2>${col.description ? `<p>${esc(col.description)}</p>` : ""}</div>
+        ${isAdmin() ? `<div style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn" id="share">Sharing</button>
+            <button class="btn quiet" id="editcol">Edit</button>
+            <button class="btn danger" id="delcol">Delete</button></div>` : ""}
+      </div>
+      ${ed ? `<div class="tools">
+          <label class="btn primary" style="margin:0">Upload files<input id="up" type="file" multiple class="hidden"></label>
+          <button class="btn" id="addlink">Add a link</button>
+          <button class="btn" id="addnote">New note</button>
+          ${isAdmin() && col.title === "Scratchpad" && CONFIG.oldNotepad.files.length ? `<button class="btn quiet" id="import">Copy files from old notepad</button>` : ""}
+        </div>` : ""}
+      ${col.module === "nfl_pool" ? poolHTML(col) : ""}
+      ${col.module && S.items.length ? `<h3 style="font-family:var(--head);margin:1.5rem 0 .25rem">Files &amp; notes</h3>` : ""}
+      ${S.items.length ? `<ul class="items">${S.items.map(itemRow).join("")}</ul>`
+        : col.module ? "" : `<p class="empty">${ed ? "Nothing here yet. Upload a file, add a link, or start a note." : "Nothing has been added to this collection yet."}</p>`}
+      `}
+    </main>
+  </div>`;
+  wireShell(col);
+}
+
+function itemRow(it){
+  const ed = canEdit(it.collection_id);
+  const meta = [it.kind === "file" ? fmtSize(it.size_bytes) : it.kind === "link" ? (safeHost(it.url)) : "Note", "Updated " + fmtDate(it.updated_at)].filter(Boolean).join(", ");
+  let acts = "";
+  if (it.kind === "file"){
+    if (viewableType(it)) acts += `<button class="btn" data-act="open" data-id="${it.id}">Open</button>`;
+    acts += `<button class="btn" data-act="dl" data-id="${it.id}">Download</button>`;
+  } else if (it.kind === "link"){
+    acts += `<a class="btn" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Open link</a>`;
+  } else {
+    acts += `<button class="btn" data-act="note" data-id="${it.id}">${ed ? "Open & edit" : "Read"}</button>`;
+  }
+  if (ed){
+    if (it.kind === "file") acts += `<button class="btn quiet" data-act="replace" data-id="${it.id}">Replace file</button>`;
+    acts += `<button class="btn quiet" data-act="rename" data-id="${it.id}">Rename</button>`;
+    acts += `<button class="btn danger" data-act="del" data-id="${it.id}">Delete</button>`;
+  }
+  return `<li>
+    <span class="it-ic" aria-hidden="true">${iconFor(it)}</span>
+    <div><div class="it-t">${esc(it.title)}</div>${it.description ? `<div>${esc(it.description)}</div>` : ""}<div class="it-m">${esc(meta)}</div></div>
+    <div class="it-a">${acts}</div></li>`;
+}
+function safeHost(u){ try { return new URL(u).hostname; } catch { return "Link"; } }
+
+function wireShell(col){
+  document.getElementById("out").onclick = async () => { await sb.auth.signOut(); };
+  document.getElementById("chpw").onclick = () => renderSetPassword();
+  document.getElementById("myname").onclick = () => nameDialog();
+  document.querySelectorAll(".tab").forEach(t => t.onclick = async () => {
+    S.current = t.dataset.id; try { await loadItems(); } catch(e){ fail(e, "Loading"); } renderShell();
+  });
+  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+  on("newcol", () => collectionDialog(null));
+  on("editcol", () => collectionDialog(col));
+  on("delcol", () => deleteCollection(col));
+  on("share", () => shareDialog(col));
+  on("addlink", () => linkDialog(col));
+  on("addnote", () => newNote(col));
+  on("import", () => importOldNotepad(col));
+  if (col?.module === "nfl_pool") wirePool(col);
+  const up = document.getElementById("up"); if (up) up.onchange = () => uploadFiles(col, [...up.files]);
+  document.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
+    const it = S.items.find(x => x.id === b.dataset.id); if (!it) return;
+    ({ open: openFile, dl: downloadFile, note: openNote, rename: renameItem, del: deleteItem, replace: replaceFile })[b.dataset.act](it);
+  });
+}
+async function refresh(){ try { await loadItems(); } catch(e){ fail(e, "Loading"); } renderShell(); }
+
+/* ============ FILES ============ */
+async function uploadFiles(col, files){
+  if (!files.length) return;
+  let ok = 0;
+  for (const f of files){
+    toast(`Uploading ${f.name}…`);
+    const path = `${col.id}/${crypto.randomUUID()}-${safeName(f.name)}`;
+    const up = await sb.storage.from(CONFIG.bucket).upload(path, f, { contentType: f.type || "application/octet-stream" });
+    if (up.error){ fail(up.error, f.name); continue; }
+    const ins = await sb.from("items").insert({ collection_id: col.id, kind:"file", title:f.name, storage_path:path, mime_type:f.type || null, size_bytes:f.size });
+    if (ins.error){ await sb.storage.from(CONFIG.bucket).remove([path]); fail(ins.error, f.name); continue; }
+    ok++;
+  }
+  if (ok) toast(`Uploaded ${ok} file${ok>1?"s":""}`);
+  refresh();
+}
+
+async function downloadFile(it){
+  const { data, error } = await sb.storage.from(CONFIG.bucket).createSignedUrl(it.storage_path, 120, { download: it.title });
+  if (error) return fail(error, "Download");
+  const a = document.createElement("a"); a.href = data.signedUrl; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+async function openFile(it){
+  const type = viewableType(it);
+  const v = viewerShell(it.title, `<button class="btn" id="vdl">Download</button>`);
+  v.querySelector("#vdl").onclick = () => downloadFile(it);
+  const body = v.querySelector(".body");
+  body.innerHTML = `<p class="empty" style="margin:auto">Opening…</p>`;
+  const { data, error } = await sb.storage.from(CONFIG.bucket).download(it.storage_path);
+  if (error){ body.innerHTML = `<p class="empty" style="margin:auto">This file couldn't be opened. Try Download instead.</p>`; return fail(error, "Open"); }
+  if (type === "html"){
+    // Sandboxed without same-origin: the page runs its own scripts but can't read your sign-in.
+    const f = document.createElement("iframe");
+    f.setAttribute("sandbox", "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads allow-forms");
+    f.setAttribute("allow", "clipboard-write");
+    f.title = it.title;
+    f.srcdoc = await data.text();
+    body.innerHTML = ""; body.appendChild(f);
+  } else if (type === "pdf"){
+    const u = URL.createObjectURL(new Blob([data], { type:"application/pdf" }));
+    body.innerHTML = `<iframe title="${esc(it.title)}" src="${u}"></iframe>`;
+  } else if (type === "image"){
+    const u = URL.createObjectURL(data);
+    body.innerHTML = `<img alt="${esc(it.title)}" src="${u}">`;
+  } else {
+    body.innerHTML = `<pre></pre>`; body.querySelector("pre").textContent = await data.text();
+  }
+}
+
+function viewerShell(title, extra=""){
+  const v = document.createElement("div");
+  v.className = "viewer"; v.setAttribute("role","dialog"); v.setAttribute("aria-label", title);
+  v.innerHTML = `<div class="bar"><h3>${esc(title)}</h3>${extra}<button class="btn primary" id="vclose">Close</button></div><div class="body"></div>`;
+  document.body.appendChild(v);
+  const close = () => { v.remove(); document.removeEventListener("keydown", k); };
+  const k = e => { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", k);
+  v.querySelector("#vclose").onclick = close;
+  v.querySelector("#vclose").focus();
+  v._close = close;
+  return v;
+}
+
+/* ============ NOTES ============ */
+async function newNote(col){
+  const { data, error } = await sb.from("items").insert({ collection_id: col.id, kind:"note", title:"New note", body:"" }).select().single();
+  if (error) return fail(error, "New note");
+  await refresh(); openNote(data);
+}
+function openNote(it){
+  const ed = canEdit(it.collection_id);
+  const v = viewerShell(it.title, ed ? `<button class="btn" id="nsave">Save note</button>` : "");
+  const body = v.querySelector(".body");
+  body.innerHTML = `<div class="note">${ed ? `<textarea aria-label="Note text"></textarea><div class="it-m" id="nstat">Last saved ${esc(fmtDate(it.updated_at))}</div>` : `<pre></pre>`}</div>`;
+  if (!ed){ body.querySelector("pre").textContent = it.body || ""; return; }
+  const ta = body.querySelector("textarea"); ta.value = it.body || "";
+  let base = it.updated_at, dirty = false;
+  ta.oninput = () => { dirty = true; v.querySelector("#nstat").textContent = "Unsaved changes"; };
+  const save = async () => {
+    const { data, error } = await sb.from("items").update({ body: ta.value }).eq("id", it.id).eq("updated_at", base).select();
+    if (error) return fail(error, "Save");
+    if (!data.length){ toast("Someone else changed this note. Close and reopen it to see their version."); return; }
+    base = data[0].updated_at; dirty = false;
+    v.querySelector("#nstat").textContent = "Saved just now"; toast("Note saved");
+    const i = S.items.findIndex(x => x.id === it.id); if (i > -1) S.items[i] = data[0];
+  };
+  v.querySelector("#nsave").onclick = save;
+  const origClose = v._close;
+  v.querySelector("#vclose").onclick = () => { if (dirty && !confirm("You have unsaved changes. Close without saving?")) return; origClose(); renderShell(); };
+  ta.focus();
+}
+
+/* ============ ITEM EDITS ============ */
+function dialog(title, inner, onSubmit, submitLabel="Save"){
+  $dlg.innerHTML = `<form method="dialog" id="df"><h3>${esc(title)}</h3>${inner}
+    <div class="row"><button class="btn quiet" value="cancel" formnovalidate>Cancel</button><button class="btn primary" value="ok">${esc(submitLabel)}</button></div></form>`;
+  const f = $dlg.querySelector("#df");
+  f.onsubmit = async e => {
+    if (e.submitter?.value !== "ok") return;
+    e.preventDefault(); e.submitter.disabled = true;
+    try { await onSubmit(f); $dlg.close(); } catch(err){ fail(err); } finally { if (e.submitter) e.submitter.disabled = false; }
+  };
+  $dlg.showModal();
+  return f;
+}
+function renameItem(it){
+  dialog("Rename", `<label for="dt">Name</label><input id="dt" type="text" required value="${esc(it.title)}">
+    <label for="dd">Description (optional)</label><input id="dd" type="text" value="${esc(it.description || "")}">`,
+    async f => { const { error } = await sb.from("items").update({ title: f.dt.value.trim(), description: f.dd.value.trim() || null }).eq("id", it.id); if (error) throw error; refresh(); });
+}
+async function deleteItem(it){
+  if (!confirm(`Delete "${it.title}"? This can't be undone.`)) return;
+  if (it.kind === "file" && it.storage_path){
+    const r = await sb.storage.from(CONFIG.bucket).remove([it.storage_path]);
+    if (r.error) return fail(r.error, "Delete");
+  }
+  const { error } = await sb.from("items").delete().eq("id", it.id);
+  if (error) return fail(error, "Delete");
+  toast("Deleted"); refresh();
+}
+function linkDialog(col){
+  dialog("Add a link", `<label for="lt">Name</label><input id="lt" type="text" required>
+    <label for="lu">Web address</label><input id="lu" type="url" required placeholder="https://">
+    <label for="ld">Description (optional)</label><input id="ld" type="text">`,
+    async f => { const { error } = await sb.from("items").insert({ collection_id: col.id, kind:"link", title:f.lt.value.trim(), url:f.lu.value.trim(), description:f.ld.value.trim() || null }); if (error) throw error; refresh(); }, "Add link");
+}
+
+/* ============ ADMIN ============ */
+function collectionDialog(col){
+  dialog(col ? "Edit collection" : "New collection", `
+    <label for="ct">Name</label><input id="ct" type="text" required value="${esc(col?.title || "")}">
+    <label for="cd">Description (optional)</label><textarea id="cd" style="min-height:5rem">${esc(col?.description || "")}</textarea>
+    <label for="ci">Icon (one emoji)</label><input id="ci" type="text" maxlength="4" value="${esc(col?.icon || "📁")}">`,
+    async f => {
+      const row = { title: f.ct.value.trim(), description: f.cd.value.trim() || null, icon: f.ci.value.trim() || "📁" };
+      const r = col ? await sb.from("collections").update(row).eq("id", col.id) : await sb.from("collections").insert(row).select().single();
+      if (r.error) throw r.error;
+      if (!col) S.current = r.data.id;
+      await boot(true);
+    }, col ? "Save" : "Create");
+}
+async function deleteCollection(col){
+  if (!confirm(`Delete "${col.title}" and everything in it? This can't be undone.`)) return;
+  const paths = S.items.filter(i => i.storage_path).map(i => i.storage_path);
+  if (paths.length){ const r = await sb.storage.from(CONFIG.bucket).remove(paths); if (r.error) return fail(r.error, "Delete"); }
+  const { error } = await sb.from("collections").delete().eq("id", col.id);
+  if (error) return fail(error, "Delete");
+  S.current = null; toast("Collection deleted"); boot(true);
+}
+async function shareDialog(col){
+  const { data, error } = await sb.from("collection_access").select("user_id, can_edit").eq("collection_id", col.id);
+  if (error) return fail(error, "Sharing");
+  const cur = Object.fromEntries((data || []).map(r => [r.user_id, r.can_edit]));
+  const others = S.people.filter(p => !p.is_admin);
+  const rows = others.length ? others.map(p => `
+    <div class="share-row" data-uid="${p.id}">
+      <div><strong>${esc(p.display_name || p.email)}</strong><div class="it-m">${esc(p.email)}</div></div>
+      <label><input type="checkbox" class="sv" ${p.id in cur ? "checked" : ""}> Can see</label>
+      <label><input type="checkbox" class="se" ${cur[p.id] ? "checked" : ""}> Can add &amp; edit</label>
+    </div>`).join("")
+    : `<p class="empty">No one else has an account yet. Add people in Supabase (Authentication, then Users), then come back here.</p>`;
+  dialog(`Sharing: ${col.title}`, rows, async f => {
+    for (const r of f.querySelectorAll(".share-row")){
+      const uid = r.dataset.uid, see = r.querySelector(".sv").checked, edit = r.querySelector(".se").checked && see;
+      if (see){
+        const { error } = await sb.from("collection_access").upsert({ collection_id: col.id, user_id: uid, can_edit: edit });
+        if (error) throw error;
+      } else if (uid in cur){
+        const { error } = await sb.from("collection_access").delete().eq("collection_id", col.id).eq("user_id", uid);
+        if (error) throw error;
+      }
+    }
+    toast("Sharing updated");
+  }, "Save sharing");
+}
+async function importOldNotepad(col){
+  const existing = new Set(S.items.map(i => i.title));
+  let ok = 0, skipped = 0;
+  for (const name of CONFIG.oldNotepad.files){
+    const clean = name.replace(/^\d+_/, "");
+    if (existing.has(clean)){ skipped++; continue; }
+    try {
+      toast(`Copying ${clean}…`);
+      const res = await fetch(CONFIG.oldNotepad.base + encodeURIComponent(name));
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const path = `${col.id}/${crypto.randomUUID()}-${safeName(clean)}`;
+      const up = await sb.storage.from(CONFIG.bucket).upload(path, blob, { contentType: blob.type || "application/octet-stream" });
+      if (up.error) throw up.error;
+      const ins = await sb.from("items").insert({ collection_id: col.id, kind:"file", title:clean, storage_path:path, mime_type: blob.type || null, size_bytes: blob.size });
+      if (ins.error){ await sb.storage.from(CONFIG.bucket).remove([path]); throw ins.error; }
+      ok++;
+    } catch(e){ fail(e, clean); }
+  }
+  toast(`Copied ${ok}${skipped ? `, ${skipped} already here` : ""}`);
+  refresh();
+}
+
+/* ============ REPLACE FILE / NAME ============ */
+function replaceFile(it){
+  const inp = document.createElement("input"); inp.type = "file";
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    if (!confirm(`Replace "${it.title}" with ${f.name}? Everyone with access will see the new version.`)) return;
+    toast(`Uploading ${f.name}…`);
+    const path = `${it.collection_id}/${crypto.randomUUID()}-${safeName(f.name)}`;
+    const up = await sb.storage.from(CONFIG.bucket).upload(path, f, { contentType: f.type || "application/octet-stream" });
+    if (up.error) return fail(up.error, "Replace");
+    const { error } = await sb.from("items").update({ storage_path: path, mime_type: f.type || null, size_bytes: f.size }).eq("id", it.id);
+    if (error){ await sb.storage.from(CONFIG.bucket).remove([path]); return fail(error, "Replace"); }
+    await sb.storage.from(CONFIG.bucket).remove([it.storage_path]);
+    toast("File replaced"); refresh();
+  };
+  inp.click();
+}
+function nameDialog(){
+  dialog("Your name", `<p class="it-m">This is how you appear to others, for example on the pool standings.</p>
+    <label for="nm">Name</label><input id="nm" type="text" required maxlength="40" value="${esc(S.profile.display_name || "")}">`,
+    async f => {
+      const { error } = await sb.from("profiles").update({ display_name: f.nm.value.trim() }).eq("id", S.user.id);
+      if (error) throw error;
+      S.profile.display_name = f.nm.value.trim(); await refresh();
+    });
+}
+
+/* ============ NFL POOL ============ */
+const TEAMS = [["ARI","Cardinals"],["ATL","Falcons"],["BAL","Ravens"],["BUF","Bills"],["CAR","Panthers"],["CHI","Bears"],["CIN","Bengals"],["CLE","Browns"],["DAL","Cowboys"],["DEN","Broncos"],["DET","Lions"],["GB","Packers"],["HOU","Texans"],["IND","Colts"],["JAX","Jaguars"],["KC","Chiefs"],["LV","Raiders"],["LAC","Chargers"],["LAR","Rams"],["MIA","Dolphins"],["MIN","Vikings"],["NE","Patriots"],["NO","Saints"],["NYG","Giants"],["NYJ","Jets"],["PHI","Eagles"],["PIT","Steelers"],["SF","49ers"],["SEA","Seahawks"],["TB","Buccaneers"],["TEN","Titans"],["WAS","Commanders"]];
+const teamName = c => (TEAMS.find(t => t[0] === c) || [c, c])[1];
+const P = { entries: [], picks: [], active: null, editWeek: null };
+
+async function loadPool(col){
+  const e = await sb.from("pool_entries").select("*").eq("collection_id", col.id).order("sort").order("created_at");
+  if (e.error) throw e.error;
+  P.entries = e.data || [];
+  const ids = P.entries.map(x => x.id);
+  if (ids.length){
+    const p = await sb.from("pool_picks").select("*").in("entry_id", ids).order("week");
+    if (p.error) throw p.error;
+    P.picks = p.data || [];
+  } else P.picks = [];
+  const mine = P.entries.filter(x => x.owner_id === S.user.id);
+  if (!mine.find(x => x.id === P.active)) P.active = mine[0]?.id || null;
+}
+const picksOf = eid => P.picks.filter(p => p.entry_id === eid).sort((a, b) => a.week - b.week);
+function entryStats(eid){
+  const ps = picksOf(eid), done = ps.filter(p => p.points != null);
+  const total = done.reduce((s, p) => s + p.points, 0);
+  return { ps, total, weeks: ps.length, pending: ps.length - done.length, avg: done.length ? (total / done.length).toFixed(1) : "0.0" };
+}
+function nextWeek(eid){ const used = new Set(picksOf(eid).map(p => p.week)); for (let w = 1; w <= 18; w++) if (!used.has(w)) return w; return 18; }
+
+function poolHTML(col){
+  const mine = P.entries.filter(x => x.owner_id === S.user.id);
+  const others = P.entries.filter(x => x.owner_id !== S.user.id);
+  const ranked = [...P.entries].sort((a, b) => entryStats(b.id).total - entryStats(a.id).total);
+  let h = `<section class="pool" aria-label="Pool">`;
+  h += `<h3>Standings</h3>`;
+  h += ranked.length ? `<div class="board">${ranked.map(e => { const s = entryStats(e.id); return `
+      <div class="b ${e.owner_id === S.user.id ? "mine" : ""}">
+        <div class="n">${esc(e.name)}</div><div class="o">${esc(e.owner_name || "")}</div>
+        <div class="tot">${s.total}</div>
+        <div class="sub">${s.weeks} of 18 weeks${s.pending ? `, ${s.pending} waiting on a score` : ""}</div>
+      </div>`; }).join("")}</div>`
+    : `<p class="empty">No entries yet.</p>`;
+
+  if (!mine.length){
+    h += `<h3>Your entries</h3>
+      <p>Set up your own entries to track picks. They're separate from everyone else's: only you can change them.</p>
+      <form id="psetup" style="max-width:28rem">
+        <label for="pe1">First entry name</label><input id="pe1" type="text" value="My Picks" required>
+        <label for="pe2">Second entry name (leave blank for just one)</label><input id="pe2" type="text" value="Claude's Picks">
+        <button class="btn primary" style="margin-top:1rem">Create my entries</button>
+      </form>`;
+  } else {
+    const act = mine.find(x => x.id === P.active) || mine[0];
+    P.active = act.id;
+    const s = entryStats(act.id);
+    const wk = P.editWeek ?? nextWeek(act.id);
+    const cur = s.ps.find(p => p.week === wk);
+    const usedElsewhere = new Set(s.ps.filter(p => p.week !== wk).map(p => p.team));
+    let run = 0;
+    h += `<h3>Your entries</h3>
+      <div class="seg" role="group" aria-label="Your entries">
+        ${mine.map(e => `<button data-entry="${e.id}" aria-pressed="${e.id === act.id}">${esc(e.name)}</button>`).join("")}
+        <button id="padd" class="quiet">+ Add entry</button>
+      </div>
+      <p class="it-m">${s.total} points, ${s.weeks} of 18 weeks picked, ${s.avg} average${s.pending ? `, ${s.pending} waiting on a score` : ""}</p>
+      <form class="pform" id="pform">
+        <div><label for="pw">Week</label><select id="pw">${Array.from({ length: 18 }, (_, i) => i + 1).map(w => `<option value="${w}" ${w === wk ? "selected" : ""}>${w}${s.ps.find(p => p.week === w) ? " ✓" : ""}</option>`).join("")}</select></div>
+        <div class="team"><label for="pt">Team</label><select id="pt" required><option value="">Choose a team</option>${TEAMS.map(([c, n]) => `<option value="${c}" ${usedElsewhere.has(c) ? "disabled" : ""} ${cur?.team === c ? "selected" : ""}>${n} (${c})${usedElsewhere.has(c) ? ", used" : ""}</option>`).join("")}</select></div>
+        <div><label for="pp">Points</label><input id="pp" type="number" min="0" max="150" inputmode="numeric" placeholder="Later" value="${cur?.points ?? ""}"></div>
+        <button class="btn primary">${cur ? "Update pick" : "Save pick"}</button>
+      </form>
+      <p class="it-m">Leave Points empty to save the pick now and add the score after the game.</p>
+      ${s.ps.length ? `<div class="scroll"><table class="picks"><thead><tr><th>Week</th><th>Team</th><th class="num">Points</th><th class="num">Total</th><th></th></tr></thead><tbody>
+        ${s.ps.map(p => { if (p.points != null) run += p.points; return `<tr>
+          <td>${p.week}</td><td>${esc(teamName(p.team))}</td>
+          <td class="num">${p.points != null ? p.points : `<span class="pending">pending</span>`}</td>
+          <td class="num">${run}</td>
+          <td style="text-align:right;white-space:nowrap">${p.points == null ? `<button class="btn" data-pedit="${p.week}">Add score</button>` : `<button class="btn quiet" data-pedit="${p.week}">Edit</button>`}
+            <button class="btn danger" data-pdel="${p.id}">Delete</button></td></tr>`; }).join("")}
+        </tbody></table></div>` : `<p class="empty">No picks yet. Choose a week and team above.</p>`}
+      <details class="more"><summary>Teams still available (${32 - new Set(s.ps.map(p => p.team)).size})</summary>
+        <div class="chips">${TEAMS.filter(([c]) => !s.ps.some(p => p.team === c)).map(([c, n]) => `<span title="${n}">${c}</span>`).join("")}</div></details>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem">
+        <button class="btn" id="pcopy">Copy season log</button>
+        <button class="btn" id="pdl">Download season log</button>
+        <button class="btn quiet" id="pren">Rename entry</button>
+        <button class="btn danger" id="pdelent">Delete entry</button>
+      </div>`;
+  }
+  if (others.length){
+    h += `<details class="more"><summary>Everyone else's picks</summary>${others.map(e => { let r = 0; const s = entryStats(e.id); return `
+      <h3>${esc(e.name)} <span class="it-m">${esc(e.owner_name || "")}, ${s.total} points</span></h3>
+      ${s.ps.length ? `<div class="scroll"><table class="picks"><thead><tr><th>Week</th><th>Team</th><th class="num">Points</th><th class="num">Total</th></tr></thead><tbody>
+      ${s.ps.map(p => { if (p.points != null) r += p.points; return `<tr><td>${p.week}</td><td>${esc(teamName(p.team))}</td><td class="num">${p.points != null ? p.points : `<span class="pending">pending</span>`}</td><td class="num">${r}</td></tr>`; }).join("")}
+      </tbody></table></div>` : `<p class="empty">No picks yet.</p>`}`; }).join("")}</details>`;
+  }
+  return h + `</section>`;
+}
+
+function poolLog(){
+  const date = new Date().toISOString().slice(0, 10);
+  let out = `# 2026 NFL Total Points Pool\n_Updated ${date}_\n`;
+  for (const e of P.entries.filter(x => x.owner_id === S.user.id)){
+    const s = entryStats(e.id); let run = 0;
+    out += `\n## ${e.name}: ${s.total} pts (${s.weeks}/18 weeks${s.pending ? `, ${s.pending} pending` : ""})\n\n`;
+    if (!s.ps.length){ out += "_No picks logged yet._\n"; continue; }
+    out += "| Week | Team | Points | Total |\n|---|---|---|---|\n";
+    for (const p of s.ps){ if (p.points != null) run += p.points; out += `| ${p.week} | ${teamName(p.team)} | ${p.points ?? "pending"} | ${run} |\n`; }
+  }
+  return out;
+}
+
+function wirePool(col){
+  const q = id => document.getElementById(id);
+  const again = async () => { try { await loadPool(col); } catch(e){ fail(e, "Pool"); } renderShell(); };
+  if (q("psetup")) q("psetup").onsubmit = async e => {
+    e.preventDefault();
+    const names = [q("pe1").value.trim(), q("pe2").value.trim()].filter(Boolean);
+    const { error } = await sb.from("pool_entries").insert(names.map((n, i) => ({ collection_id: col.id, name: n, sort: i + 1 })));
+    if (error) return fail(error, "Set up");
+    toast("Entries created"); again();
+  };
+  document.querySelectorAll("[data-entry]").forEach(b => b.onclick = () => { P.active = b.dataset.entry; P.editWeek = null; renderShell(); });
+  if (q("padd")) q("padd").onclick = () => dialog("Add an entry", `<label for="en">Entry name</label><input id="en" type="text" required>`, async f => {
+    const { data, error } = await sb.from("pool_entries").insert({ collection_id: col.id, name: f.en.value.trim(), sort: 50 }).select().single();
+    if (error) throw error; P.active = data.id; again();
+  }, "Add entry");
+  if (!q("pform")) return;
+  q("pw").onchange = () => { P.editWeek = +q("pw").value; renderShell(); };
+  q("pform").onsubmit = async e => {
+    e.preventDefault();
+    const week = +q("pw").value, team = q("pt").value, raw = q("pp").value.trim();
+    const points = raw === "" ? null : Math.round(+raw);
+    const { error } = await sb.from("pool_picks").upsert({ entry_id: P.active, week, team, points }, { onConflict: "entry_id,week" });
+    if (error) return fail(/pool_picks_entry_id_team_key/.test(error.message) ? "That team is already used in another week" : error, "Save pick");
+    toast(points == null ? `Week ${week} saved, score pending` : `Week ${week} saved`);
+    P.editWeek = null; again();
+  };
+  document.querySelectorAll("[data-pedit]").forEach(b => b.onclick = () => { P.editWeek = +b.dataset.pedit; renderShell(); setTimeout(() => q("pp")?.focus(), 0); });
+  document.querySelectorAll("[data-pdel]").forEach(b => b.onclick = async () => {
+    if (!confirm("Delete this pick?")) return;
+    const { error } = await sb.from("pool_picks").delete().eq("id", b.dataset.pdel);
+    if (error) return fail(error, "Delete"); again();
+  });
+  q("pcopy").onclick = async () => { try { await navigator.clipboard.writeText(poolLog()); toast("Season log copied"); } catch { fail("Copy isn't allowed here. Use Download instead."); } };
+  q("pdl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([poolLog()], { type: "text/markdown" })); a.download = "nfl-pool-season-log.md"; a.click(); };
+  q("pren").onclick = () => { const e = P.entries.find(x => x.id === P.active); dialog("Rename entry", `<label for="rn">Entry name</label><input id="rn" type="text" required value="${esc(e.name)}">`, async f => {
+    const { error } = await sb.from("pool_entries").update({ name: f.rn.value.trim() }).eq("id", e.id); if (error) throw error; again(); }); };
+  q("pdelent").onclick = async () => { const e = P.entries.find(x => x.id === P.active);
+    if (!confirm(`Delete "${e.name}" and all its picks? This can't be undone.`)) return;
+    const { error } = await sb.from("pool_entries").delete().eq("id", e.id); if (error) return fail(error, "Delete");
+    P.active = null; again(); };
+}
+
+/* ============ BOOT ============ */
+async function boot(keepCurrent){
+  const { data } = await sb.auth.getSession();
+  S.user = data.session?.user || null;
+  if (!S.user) return renderLogin();
+  if (S.pwMode) return renderSetPassword();
+  try { await loadBase(); await loadItems(); renderShell(); }
+  catch(e){ $app.innerHTML = `<div class="auth"><div class="card"><h1>Couldn't load</h1><p class="sub">${esc(e.message)}</p><button class="btn primary" onclick="location.reload()">Try again</button></div></div>`; }
+}
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === "PASSWORD_RECOVERY"){ S.pwMode = true; S.user = session?.user; renderSetPassword(); return; }
+  if (event === "SIGNED_OUT"){ Object.assign(S, { user:null, profile:null, collections:[], items:[], current:null }); renderLogin(); return; }
+  if (event === "SIGNED_IN" && !S.profile) setTimeout(() => boot(), 0);
+});
+boot();
+</script>
+</body>
+</html>
